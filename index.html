@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>EcoMedellín ♻️ - Prototipo Final (Entrega)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --verde:#2E7D32;
+      --verde-2:#43A047;
+      --light:#f5f5f5;
+      --card:#ffffff;
+      --danger:#E53935;
+      --muted:#666;
+    }
+    *{box-sizing:border-box;font-family:Roboto,Arial,Helvetica,sans-serif}
+    body{margin:0;background:var(--light);color:#222}
+    header{background:linear-gradient(90deg,var(--verde),var(--verde-2));color:#fff;padding:14px;text-align:center;font-weight:700;box-shadow:0 3px 8px rgba(0,0,0,0.12)}
+    .container{width:94%;max-width:900px;margin:28px auto;background:var(--card);padding:20px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+    h2{color:var(--verde);margin-top:0;text-align:center}
+    input,select,button,textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #ddd;font-size:15px}
+    button{background:var(--verde);color:#fff;border:none;cursor:pointer;font-weight:600}
+    button.btn-sec{background:#66BB6A;color:#fff}
+    button.btn-danger{background:var(--danger);color:#fff}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border:1px solid #e9e9e9;text-align:left}
+    th{background:#E8F5E9}
+    .hidden{display:none}
+    .msg{padding:10px;border-radius:6px;margin-bottom:10px}
+    .msg.ok{background:#E8F5E9;border-left:6px solid var(--verde)}
+    .msg.err{background:#FFEBEE;border-left:6px solid var(--danger)}
+    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+    @media(max-width:700px){.row{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header>EcoMedellín ♻️ - Prototipo Final</header>
+
+  <!-- Mensaje global -->
+  <div id="globalMsg" class="container hidden"></div>
+
+  <!-- LOGIN -->
+  <div id="login" class="container">
+    <h2>Iniciar sesión</h2>
+    <input id="loginEmail" type="email" placeholder="Correo (ej: user@eco.com, recolector@eco.com, admin@eco.com)">
+    <input id="loginPass" type="password" placeholder="Contraseña (cualquiera)">
+    <div class="top-actions">
+      <button onclick="doLogin()">Ingresar</button>
+      <button class="btn-sec" onclick="mostrar('registro')">Registrarse</button>
+      <button class="btn-sec" onclick="doQuickDemo()">Demo rápida</button>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-top:10px">
+      Usuarios de prueba: <b>admin@eco.com</b> (admin), <b>recolector@eco.com</b> (recolector), cualquier otro correo = usuario.
+    </p>
+  </div>
+
+  <!-- REGISTRO -->
+  <div id="registro" class="container hidden">
+    <h2>Registro - Nuevo usuario</h2>
+    <input id="regNombre" type="text" placeholder="Nombre completo">
+    <input id="regCorreo" type="email" placeholder="Correo">
+    <input id="regLocalidad" type="text" placeholder="Localidad (ej: Medellín - Laureles)">
+    <select id="regTipo">
+      <option value="usuario">Natural (Usuario)</option>
+      <option value="recolector">Empresa / Recolector</option>
+      <option value="admin">Administrador</option>
+    </select>
+    <input id="regPass" type="password" placeholder="Contraseña">
+    <div class="top-actions">
+      <button onclick="doRegister()">Crear cuenta</button>
+      <button class="btn-sec" onclick="mostrar('login')">Volver</button>
+    </div>
+  </div>
+
+  <!-- PANEL USUARIO -->
+  <div id="panel" class="container hidden">
+    <h2>Inicio – Usuario</h2>
+    <div id="panelUserInfo" style="margin-bottom:8px">Bienvenido, <b id="userNameDisplay">Usuario EcoMedellín</b> • <span id="userLocality" style="color:var(--muted)"></span></div>
+
+    <div class="row">
+      <div class="col">
+        <div style="background:#F1F8F3;padding:12px;border-radius:8px">
+          <div style="font-size:14px;color:var(--muted)">Puntos acumulados</div>
+          <div id="userPoints" style="font-size:22px;font-weight:700">0</div>
+        </div>
+      </div>
+      <div class="col">
+        <div style="background:#fff;padding:12px;border-radius:8px;border:1px solid #eee">
+          <div style="font-size:14px;color:var(--muted)">Mis próximas</div>
+          <div id="miniNext" style="margin-top:8px;color:var(--muted)">Ninguna recolección próxima</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-actions" style="margin-top:14px">
+      <button onclick="mostrar('perfil')">Editar perfil</button>
+      <button onclick="mostrar('programar')">Programar recolección</button>
+      <button onclick="mostrar('historial')">Historial</button>
+      <button onclick="mostrar('puntos')">Fórmula de puntos</button>
+      <button onclick="mostrar('canje')">Canjear puntos</button>
+      <button onclick="mostrar('mapa')">Mapa de recolección</button>
+    </div>
+
+    <div class="top-actions" style="margin-top:10px">
+      <button onclick="mostrarRecolector()">Ir a modo Recolector</button>
+      <button onclick="mostrar('admin')" >Ir a modo Admin</button>
+      <button class="btn-sec" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div id="perfil" class="container hidden">
+    <h2>Editar perfil</h2>
+    <input id="inputNombre" type="text" placeholder="Nombre completo">
+    <input id="inputCorreo" type="email" placeholder="Correo">
+    <input id="inputLocalidad" type="text" placeholder="Localidad">
+    <div class="top-actions">
+      <button onclick="guardarPerfil()">Guardar</button>
+      <button class="btn-sec" onclick="mostrar('panel')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- PROGRAMAR -->
+  <div id="programar" class="container hidden">
+    <h2>Programar recolección</h2>
+    <select id="tipoResiduo">
+      <option value="Reciclable">Residuo reciclable</option>
+      <option value="Organico">Residuo orgánico</option>
+      <option value="Peligroso">Residuo peligroso</option>
+    </select>
+    <input id="fechaResiduo" type="date">
+    <input id="direccionResiduo" type="text" placeholder="Dirección (ej: Calle 45 #80-23)">
+    <div class="top-actions">
+      <button onclick="guardarRecoleccion()">Guardar solicitud</button>
+      <button class="btn-sec" onclick="mostrar('panel')">Cancelar</button>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px">Nota: puedes luego registrar el peso cuando la recolección sea realizada (desde el modo Recolector).</p>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div id="historial" class="container hidden">
+    <h2>Historial de recolecciones</h2>
+    <table id="tablaHistorial">
+      <thead>
+        <tr><th>Fecha</th><th>Tipo</th><th>Dirección</th><th>Peso (kg)</th><th>Puntos</th><th>Estado</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="top-actions" style="margin-top:10px">
+      <button class="btn-danger" onclick="borrarHistorial()">Borrar historial</button>
+      <button class="btn-sec" onclick="mostrar('panel')">Regresar</button>
+    </div>
+  </div>
+
+  <!-- PUNTOS -->
+  <div id="puntos" class="container hidden">
+    <h2>Fórmula de puntos</h2>
+    <p>Reglas del sistema para asignar puntos por recolección:</p>
+    <ul>
+      <li>Residuo reciclable: <b>2 puntos</b> por kg</li>
+      <li>Residuo orgánico: <b>1 punto</b> por kg</li>
+      <li>Residuo peligroso: <b>3 puntos</b> por kg</li>
+    </ul>
+    <button class="btn-sec" onclick="mostrar('panel')">Regresar</button>
+  </div>
+
+  <!-- CANJE -->
+  <div id="canje" class="container hidden">
+    <h2>Canje de puntos</h2>
+    <p>Puntos disponibles: <b id="canjePuntos">0</b></p>
+    <table>
+      <tr><th>Producto</th><th>Coste (puntos)</th><th>Acción</th></tr>
+      <tr><td>Bolsa ecológica</td><td>50</td><td><button onclick="canjear(50)">Canjear</button></td></tr>
+      <tr><td>Camiseta reciclada</td><td>100</td><td><button onclick="canjear(100)">Canjear</button></td></tr>
+      <tr><td>Descuento tienda verde</td><td>150</td><td><button onclick="canjear(150)">Canjear</button></td></tr>
+    </table>
+    <div class="top-actions"><button class="btn-sec" onclick="mostrar('panel')">Regresar</button></div>
+  </div>
+
+  <!-- MAPA SIMULADO -->
+  <div id="mapa" class="container hidden">
+    <h2>Mapa de recolección (simulado)</h2>
+    <p>Visualización de zonas con solicitudes activas.</p>
+    <img class="mapa" src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Mapa_de_Colombia_con_departamentos.png" alt="mapa" style="width:100%;border-radius:8px">
+    <ul id="listaMapa" style="margin-top:10px;color:var(--muted)"></ul>
+    <div class="top-actions"><button class="btn-sec" onclick="mostrar('panel')">Regresar</button></div>
+  </div>
+
+  <!-- RECOLECTOR -->
+  <div id="recolector" class="container hidden">
+    <h2>Panel – Recolector</h2>
+    <p>Solicitudes asignadas (puedes registrar peso y marcar como 'Recolectado').</p>
+    <table id="tablaRecolector">
+      <thead><tr><th>ID</th><th>Usuario</th><th>Tipo</th><th>Dirección</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="top-actions" style="margin-top:12px">
+      <button class="btn-sec" onclick="generarReporteRecolector()">Generar reporte diario</button>
+      <button onclick="mostrar('panel')">Regresar</button>
+    </div>
+  </div>
+
+  <!-- VENTANA REGISTRAR KG (RECOLECTOR) -->
+  <div id="modalKg" class="container hidden">
+    <h2>Registrar recolección (ingresar peso)</h2>
+    <input id="kgId" type="number" placeholder="ID solicitud (auto)"/>
+    <input id="kgValue" type="number" placeholder="Peso en kg (ej: 5)" min="0" step="0.1"/>
+    <div class="top-actions">
+      <button onclick="applyKg()" >Guardar registro</button>
+      <button class="btn-sec" onclick="cerrarModalKg()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="container hidden">
+    <h2>Panel – Administrador</h2>
+    <p>Reportes rápidos</p>
+    <table>
+      <tr><th>Tipo</th><th>Kilos recolectados (ejemplo)</th></tr>
+      <tr><td>Reciclable</td><td id="repRec">0</td></tr>
+      <tr><td>Orgánico</td><td id="repOrg">0</td></tr>
+      <tr><td>Peligroso</td><td id="repPel">0</td></tr>
+    </table>
+    <div class="top-actions" style="margin-top:12px">
+      <button onclick="alert('Usuarios registrados: ' + usuarios.length)">Ver usuarios</button>
+      <button onclick="alert('Reporte por comunas generado (simulado)')">Reporte por comunas</button>
+      <button class="btn-danger" onclick="borrarHistorialSistema()">Borrar historial sistema</button>
+      <button class="btn-sec" onclick="mostrar('panel')">Regresar</button>
+    </div>
+  </div>
+
+  <footer>Equipo EcoMedellín – Proyecto Ingeniería de Software I</footer>
+
+<script>
+/* ---------- Datos y persistencia ---------- */
+let usuarios = JSON.parse(localStorage.getItem('eco_usuarios')||'[]');
+let current = JSON.parse(localStorage.getItem('eco_current')||'null'); // {email,type,name,locality,points}
+let solicitudes = JSON.parse(localStorage.getItem('eco_solicitudes')||'[]'); // programadas
+let historial = JSON.parse(localStorage.getItem('eco_historial')||'[]'); // recolecciones registradas (con kg y puntos)
+let contador = Number(localStorage.getItem('eco_counter')||'1');
+
+function saveAll(){
+  localStorage.setItem('eco_usuarios', JSON.stringify(usuarios));
+  localStorage.setItem('eco_current', JSON.stringify(current));
+  localStorage.setItem('eco_solicitudes', JSON.stringify(solicitudes));
+  localStorage.setItem('eco_historial', JSON.stringify(historial));
+  localStorage.setItem('eco_counter', String(contador));
+}
+
+/* ---------- UI helpers ---------- */
+function showMsg(text,type='ok',timeout=2500){
+  const div = document.getElementById('globalMsg');
+  div.innerHTML = `<div class="msg ${type==='ok'?'ok':'err'}">${text}</div>`;
+  div.classList.remove('hidden');
+  if(timeout>0) setTimeout(()=>{ div.classList.add('hidden'); }, timeout);
+}
+function mostrar(id){
+  document.querySelectorAll('.container').forEach(c=>c.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  // updates on show
+  if(id==='panel') renderPanel();
+  if(id==='historial') renderHistorial();
+  if(id==='recolector') renderRecolector();
+  if(id==='mapa') renderMapa();
+  if(id==='canje') renderCanje();
+  if(id==='admin') renderAdmin();
+}
+
+/* ---------- Autenticación simples / demo ---------- */
+function doRegister(){
+  const name = document.getElementById('regNombre').value.trim();
+  const email = document.getElementById('regCorreo').value.trim();
+  const local = document.getElementById('regLocalidad').value.trim();
+  const tipo = document.getElementById('regTipo').value;
+  const pass = document.getElementById('regPass').value;
+  if(!name||!email||!pass){ showMsg('Complete nombre, correo y contraseña','err'); return; }
+  if(usuarios.find(u=>u.email===email)){ showMsg('El correo ya está registrado','err'); return; }
+  usuarios.push({email,name,locality:local,type:tipo,pass,points:0});
+  saveAll();
+  showMsg('Cuenta creada correctamente','ok');
+  // prefill login
+  document.getElementById('loginEmail').value = email;
+  mostrar('login');
+}
+
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  // role shortcuts
+  if(email==='admin@eco.com'){ current = {email,name:'Administrador',type:'admin',locality:'Sede'}; saveAll(); mostrar('admin'); showMsg('Entrando como administrador','ok'); return; }
+  if(email==='recolector@eco.com'){ current = {email,name:'Recolector',type:'recolector',locality:'Empresa'}; saveAll(); mostrar('recolector'); showMsg('Entrando como recolector','ok'); return; }
+  // normal users
+  const user = usuarios.find(u=>u.email===email && u.pass===pass);
+  if(!user){ showMsg('Credenciales incorrectas (usa demo o regístrate)','err'); return; }
+  current = {email:user.email,name:user.name,type:user.type,locality:user.locality,points:user.points||0};
+  saveAll();
+  mostrar('panel');
+  showMsg('Bienvenido, ' + current.name,'ok');
+}
+
+function doQuickDemo(){
+  // create demo user if not exists
+  if(!usuarios.find(u=>u.email==='demo@eco.com')){
+    usuarios.push({email:'demo@eco.com',name:'Equipo Demo',locality:'Laureles',type:'usuario',pass:'demo',points:20});
+    saveAll();
+  }
+  document.getElementById('loginEmail').value='demo@eco.com';
+  document.getElementById('loginPass').value='demo';
+  doLogin();
+}
+function doLogout(){ current=null; localStorage.setItem('eco_current',null); mostrar('login'); showMsg('Cerró sesión','ok'); }
+
+/* ---------- Perfil ---------- */
+function guardarPerfil(){
+  const nombre = document.getElementById('inputNombre').value.trim();
+  const correo = document.getElementById('inputCorreo').value.trim();
+  const localidad = document.getElementById('inputLocalidad').value.trim();
+  if(!nombre){ showMsg('Nombre requerido','err'); return; }
+  // update current and users store
+  if(current){
+    current.name = nombre;
+    if(correo) current.email = correo;
+    if(localidad) current.locality = localidad;
+    // update usuarios list if exists
+    const idx = usuarios.findIndex(u=>u.email===current.email);
+    if(idx>=0){
+      usuarios[idx].name = nombre;
+      usuarios[idx].locality = localidad;
+    } else {
+      // ensure user record exists
+      usuarios.push({email: current.email||('u'+Date.now()), name:nombre, locality:localidad, type:current.type||'usuario', pass:'', points:current.points||0});
+    }
+    saveAll();
+    showMsg('Perfil guardado','ok');
+    mostrar('panel');
+  } else { showMsg('Debe iniciar sesión para guardar perfil','err'); }
+}
+
+/* ---------- Recolecciones (programar) ---------- */
+function guardarRecoleccion(){
+  if(!current){ showMsg('Inicia sesión para programar','err'); return; }
+  const tipo = document.getElementById('tipoResiduo').value;
+  const fecha = document.getElementById('fechaResiduo').value;
+  const direccion = document.getElementById('direccionResiduo').value.trim();
+  if(!fecha||!direccion){ showMsg('Complete fecha y dirección','err'); return; }
+  const sol = { id: contador++, usuario: current.name, email: current.email, tipo, direccion, fecha, estado:'Pendiente' };
+  solicitudes.push(sol);
+  saveAll();
+  showMsg('Solicitud guardada','ok');
+  mostrar('panel');
+}
+
+/* ---------- Historial (visual + borrado) ---------- */
+function renderHistorial(){
+  const tbody = document.querySelector('#tablaHistorial tbody');
+  tbody.innerHTML = '';
+  if(historial.length===0){
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">No hay registros</td></tr>';
+    return;
+  }
+  historial.forEach(h=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${h.fecha}</td><td>${h.tipo}</td><td>${h.direccion}</td><td>${h.kg??'-'}</td><td>${h.puntos??0}</td><td>${h.estado}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function borrarHistorial(){
+  if(!confirm('¿Desea borrar todo el historial?')) return;
+  historial = [];
+  saveAll();
+  renderHistorial();
+  showMsg('Historial del usuario borrado','ok');
+}
+
+/* ---------- Recolector: ver solicitudes y registrar kg ---------- */
+function renderRecolector(){
+  const tbody = document.querySelector('#tablaRecolector tbody');
+  tbody.innerHTML = '';
+  if(solicitudes.length===0){ tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted)">No hay solicitudes</td></tr>'; return; }
+  solicitudes.forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.id}</td>
+                    <td>${s.usuario}</td>
+                    <td>${s.tipo}</td>
+                    <td>${s.direccion}</td>
+                    <td>${s.fecha}</td>
+                    <td>${s.estado}</td>
+                    <td>
+                      <button onclick="openKg(${s.id})">Registrar kg</button>
+                    </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function openKg(id){
+  mostrar('modalKg');
+  document.getElementById('kgId').value = id;
+  document.getElementById('kgValue').value = '';
+}
+function cerrarModalKg(){ mostrar('recolector'); }
+
+function applyKg(){
+  const id = Number(document.getElementById('kgId').value);
+  const kg = Number(document.getElementById('kgValue').value);
+  if(!id || isNaN(kg) || kg<=0){ showMsg('ID y kg válidos son necesarios','err'); return; }
+  const idx = solicitudes.findIndex(s=>s.id===id);
+  if(idx<0){ showMsg('Solicitud no encontrada','err'); return; }
+  // update solicitud -> move to historial, calculate puntos
+  const s = solicitudes[idx];
+  s.estado = 'Recolectado';
+  // calcular puntos por kg
+  let factor = 1;
+  if(s.tipo==='Reciclable') factor = 2;
+  if(s.tipo==='Organico') factor = 1;
+  if(s.tipo==='Peligroso') factor = 3;
+  const puntos = Math.round(kg * factor);
+  // añadir a historial
+  const record = { fecha: s.fecha, tipo: s.tipo, direccion: s.direccion, kg, puntos, estado: 'Recolectado', usuario: s.usuario, email: s.email };
+  historial.push(record);
+  // sumar puntos al usuario en usuarios[] y si current corresponde
+  const userIdx = usuarios.findIndex(u=>u.email===s.email);
+  if(userIdx>=0){ usuarios[userIdx].points = (usuarios[userIdx].points||0) + puntos; }
+  if(current && current.email===s.email){ current.points = (current.points||0) + puntos; }
+  // eliminar solicitud (o marcar)
+  solicitudes.splice(idx,1);
+  saveAll();
+  showMsg(`Recolección registrada. Puntos: ${puntos}`,'ok');
+  mostrar('recolector');
+}
+
+/* ---------- Canje ---------- */
+function renderCanje(){
+  document.getElementById('canjePuntos').innerText = current ? (current.points||0) : 0;
+}
+function canjear(cost){
+  if(!current){ showMsg('Inicia sesión','err'); return; }
+  if((current.points||0) < cost){ showMsg('Puntos insuficientes','err'); return; }
+  current.points -= cost;
+  // update usuarios store
+  const u = usuarios.find(u=>u.email===current.email);
+  if(u) u.points = current.points;
+  saveAll();
+  renderCanje();
+  renderPanel();
+  showMsg('Canje exitoso','ok');
+}
+
+/* ---------- Panel principal y mapa ---------- */
+function renderPanel(){
+  if(!current){ mostrar('login'); return; }
+  document.getElementById('userNameDisplay').innerText = current.name;
+  document.getElementById('userLocality').innerText = current.locality||'';
+  document.getElementById('userPoints').innerText = current.points||0;
+  // next scheduled (first from solicitudes for this user)
+  const next = solicitudes.find(s=>s.email===current.email);
+  document.getElementById('miniNext').innerText = next ? `${next.tipo} • ${next.fecha} • ${next.direccion}` : 'Ninguna recolección próxima';
+}
+function renderMapa(){
+  const ul = document.getElementById('listaMapa');
+  ul.innerHTML = '';
+  if(solicitudes.length===0) ul.innerHTML='<li style="color:var(--muted)">No hay solicitudes activas</li>';
+  else solicitudes.forEach(s=>{ const li = document.createElement('li'); li.innerText = `${s.direccion} – ${s.tipo} (Solicitante: ${s.usuario})`; ul.appendChild(li);});
+}
+
+/* ---------- Admin reports ---------- */
+function renderAdmin(){
+  // sumar kilos en historial por tipo
+  let rec=0, org=0, pel=0;
+  historial.forEach(h=>{
+    if(!h.kg) return;
+    if(h.tipo==='Reciclable') rec += Number(h.kg);
+    if(h.tipo==='Organico') org += Number(h.kg);
+    if(h.tipo==='Peligroso') pel += Number(h.kg);
+  });
+  document.getElementById('repRec').innerText = rec;
+  document.getElementById('repOrg').innerText = org;
+  document.getElementById('repPel').innerText = pel;
+}
+
+/* ---------- Borrar historial sistema (admin) ---------- */
+function borrarHistorialSistema(){
+  if(!confirm('¿Borrar TODO el historial de recolecciones del sistema?')) return;
+  historial = [];
+  solicitudes = [];
+  // reset points
+  usuarios = usuarios.map(u=>({...u, points:0}));
+  saveAll();
+  showMsg('Historial del sistema borrado','ok');
+  renderAdmin();
+}
+
+/* ---------- Util: mostrar datos en campos al editar perfil ---------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // if current exists, set UI
+  if(current){ mostrar('panel'); renderPanel(); } else { mostrar('login'); }
+  // prefill profile inputs when opening profile panel
+  document.getElementById('perfil').addEventListener('click', ()=> {
+    if(current){
+      document.getElementById('inputNombre').value = current.name || '';
+      document.getElementById('inputCorreo').value = current.email || '';
+      document.getElementById('inputLocalidad').value = current.locality || '';
+    }
+  }, {capture:false});
+});
+
+/* save on unload */
+window.addEventListener('beforeunload', ()=> saveAll());
+</script>
+</body>
+</html>
+
+
+
+
